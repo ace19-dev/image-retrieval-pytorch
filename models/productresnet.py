@@ -28,13 +28,6 @@ class Product_ResNet(nn.Module):
             nn.Linear(2048, 128),
             nn.ReLU(inplace=True),
             nn.Linear(128, nclass),
-
-            # View(-1, 2048),
-            # nn.BatchNorm1d(2048),
-            # nn.Linear(2048, 128),
-            # nn.ReLU(inplace=True),
-            # nn.BatchNorm1d(128),
-            # nn.Linear(128, nclass)
         )
 
     def forward(self, x):
