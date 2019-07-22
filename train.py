@@ -40,10 +40,10 @@ def main():
     # init dataloader
     transform_train, transform_val, _ = transforms.get_transform(args.dataset)
     trainset = datasets.get_dataset(args.dataset,
-                                    root='/home/ace19/dl_data/v2-plant-seedlings-dataset2/train',
+                                    root='/home/ace19/dl_data/materials/train',
                                     transform=transform_train)
     valset = datasets.get_dataset(args.dataset,
-                                  root='/home/ace19/dl_data/v2-plant-seedlings-dataset2/val',
+                                  root='/home/ace19/dl_data/materials/validation',
                                   transform=transform_val)
 
     # balanced sampling between classes
@@ -57,7 +57,7 @@ def main():
         valset, batch_size=args.test_batch_size, shuffle=False,
         num_workers=args.workers)
 
-    # init the model
+    # init the backbone model
     if args.pretrained is not None:
         model = model_zoo.get_model(args.model)
     else:

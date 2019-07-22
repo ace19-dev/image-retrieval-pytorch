@@ -5,7 +5,7 @@ import torch
 import torch.utils.data as data
 
 class ProductDataset(data.Dataset):
-    NUM_CLASS = 12
+    NUM_CLASS = 128
     def __init__(self, root, split='train', transform=None):
         self.split = split
         self.transform = transform
