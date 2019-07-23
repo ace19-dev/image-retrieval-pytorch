@@ -28,7 +28,7 @@ class Options():
         parser.add_argument('--workers', type=int, default=16,
             metavar='N', help='dataloader threads')
         # lr setting
-        parser.add_argument('--lr', type=float, default=0.05, metavar='LR',
+        parser.add_argument('--lr', type=float, default=0.035, metavar='LR',
             help='learning rate (default: 0.1)')
         parser.add_argument('--lr-scheduler', type=str, default='cos',
             help='learning rate scheduler (default: cos)')

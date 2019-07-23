@@ -120,5 +120,5 @@ def product_resnet101(backbone_pretrained=False, **kwargs):
     return model
 
 def product_cosine_softmax(backbone_pretrained=False, **kwargs):
-    model = Product_Cosine_Softmax(datasets['product'.lower()].NUM_CLASS,  backbone_pretrained, backbone='resnet50', **kwargs)
+    model = Product_Cosine_Softmax(datasets['product'.lower()].NUM_CLASS,  backbone_pretrained, backbone='resnet101', **kwargs)
     return model
