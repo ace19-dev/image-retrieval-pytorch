@@ -8,7 +8,7 @@ def get_transform(dataset, large_test_crop=False):
     if dataset == 'product':
         transform_train = Compose([
             Resize(224),
-            RandomResizedCrop(200),
+            RandomResizedCrop(210),
             # # CenterCrop(320),
             RandomHorizontalFlip(),
             # ColorJitter(0.3, 0.3, 0.3),
@@ -49,7 +49,7 @@ def get_transform(dataset, large_test_crop=False):
 
             Resize(224),
             # this is a list of PIL Images
-            TenCrop(200),
+            TenCrop(210),
             # returns a 4D tensor
             Lambda(lambda crops: torch.stack([normalize(ToTensor()(crop)) for crop in crops])),
         ])
@@ -61,7 +61,7 @@ def get_transform(dataset, large_test_crop=False):
 
             Resize(224),
             # this is a list of PIL Images
-            TenCrop(200),
+            TenCrop(210),
             # returns a 4D tensor
             Lambda(lambda crops: torch.stack([normalize(ToTensor()(crop)) for crop in crops])),
         ])

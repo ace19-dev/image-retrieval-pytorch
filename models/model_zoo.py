@@ -26,6 +26,7 @@ def get_model(name, backbone_pretrained=False, **kwargs):
     models = {
         'product_resnet50': product_resnet50,
         'product_resnet101': product_resnet101,
+        'product_cosine_softmax': product_cosine_softmax
     }
     name = name.lower()
     if name not in models:

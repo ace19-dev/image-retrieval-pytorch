@@ -8,27 +8,27 @@ class Options():
         parser.add_argument('--dataset', type=str, default='product',
             help='training datasets (default: cifar10)')
         # model params
-        parser.add_argument('--model', type=str, default='product_resnet50',
+        parser.add_argument('--model', type=str, default='product_cosine_softmax',
             help='network model type (default: densenet)')
         parser.add_argument('--pretrained', type=str,
-                            # default=None,
-                            default='pre-trained/model_best.pth.tar',
+                            default=None,
+                            # default='pre-trained/model_best.pth.tar',
                             help='load pretrianed mode')
         parser.add_argument('--nclass', type=int, default=128, metavar='N',
             help='number of classes (default: 10)')
         # training hyper params
-        parser.add_argument('--batch-size', type=int, default=128,
+        parser.add_argument('--batch-size', type=int, default=256,
             metavar='N', help='batch size for training (default: 128)')
-        parser.add_argument('--test-batch-size', type=int, default=128,
+        parser.add_argument('--test-batch-size', type=int, default=256,
             metavar='N', help='batch size for testing (default: 256)')
-        parser.add_argument('--epochs', type=int, default=50, metavar='N',
+        parser.add_argument('--epochs', type=int, default=80, metavar='N',
             help='number of epochs to train (default: 600)')
         parser.add_argument('--start_epoch', type=int, default=1,
             metavar='N', help='the epoch number to start (default: 1)')
         parser.add_argument('--workers', type=int, default=16,
             metavar='N', help='dataloader threads')
         # lr setting
-        parser.add_argument('--lr', type=float, default=0.012, metavar='LR',
+        parser.add_argument('--lr', type=float, default=0.02, metavar='LR',
             help='learning rate (default: 0.1)')
         parser.add_argument('--lr-scheduler', type=str, default='cos',
             help='learning rate scheduler (default: cos)')

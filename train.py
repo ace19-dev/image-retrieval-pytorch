@@ -68,6 +68,8 @@ def main():
     optimizer = torch.optim.SGD(model.parameters(), lr=args.lr,
                                 momentum=args.momentum,
                                 weight_decay=args.weight_decay)
+    # optimizer = torch.optim.Adam(model.parameters(), lr=args.lr,
+    #                             weight_decay=args.weight_decay)
     if args.cuda:
         model.cuda()
         criterion.cuda()
