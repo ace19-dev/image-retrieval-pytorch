@@ -46,8 +46,8 @@ class Options():
             help='random seed (default: 1)')
         # checking point
         parser.add_argument('--checkpoint', type=str,
-                            # default=None,
-                            default='../runs/product/product_cosine_softmax/default/model_best.pth.tar',
+                            default=None,
+                            # default='../runs/product/product_cosine_softmax/default/model_best.pth.tar',
                             help='put the path to resuming file if needed')
         parser.add_argument('--checkname', type=str, default='default',
             help='set the checkpoint name')
