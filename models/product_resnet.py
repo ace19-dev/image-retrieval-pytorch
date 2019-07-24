@@ -62,7 +62,6 @@ class Product_Cosine_Softmax(nn.Module):
 
         self.weights = torch.nn.Parameter(torch.randn(2048, self.nclass))
         self.scale = torch.nn.Parameter(F.softplus(torch.randn(())))
-        # self.scale = F.softplus(self.scale)
 
         self.fc = nn.Linear(2048, 2048)
 
@@ -98,10 +97,6 @@ class Product_Cosine_Softmax(nn.Module):
         # Features in rows, normalize axis 1.
         features = F.normalize(features, p=2, dim=1, eps=1e-8)
 
-        # weights = torch.randn(feature_dim, self.nclass).type(torch.FloatTensor)
-        # scale = torch.randn(()).type(torch.FloatTensor)
-        # self.scale = F.softplus(self.scale)
-
         # Mean vectors in colums, normalize axis 0.
         weights_normed = F.normalize(self.weights, p=2, dim=0, eps=1e-8)
         logits = self.scale.cuda() * torch.mm(features.cuda(), weights_normed.cuda())     # torch.matmul
@@ -118,6 +113,7 @@ def product_resnet50(backbone_pretrained=False, **kwargs):
 def product_resnet101(backbone_pretrained=False, **kwargs):
     model = Product_ResNet(datasets['product'.lower()].NUM_CLASS,  backbone_pretrained, backbone='resnet101', **kwargs)
     return model
+
 
 def product_cosine_softmax(backbone_pretrained=False, **kwargs):
     model = Product_Cosine_Softmax(datasets['product'.lower()].NUM_CLASS,  backbone_pretrained, backbone='resnet101', **kwargs)
