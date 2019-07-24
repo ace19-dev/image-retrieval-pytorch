@@ -112,14 +112,15 @@ def main():
                 data, gt = data.cuda(), gt.cuda()
 
             with torch.no_grad():
-                # _, output = model(data)
+                # features [256, 2048]
+                # output [256, 128]
+                # features, output = model(data)
 
                 # TTA
                 batch_size, n_crops, c, h, w = data.size()
                 # fuse batch size and ncrops
                 features, _ = model(data.view(-1, c, h, w))
                 # avg over crops
-                # output = output.view(batch_size, n_crops, -1).mean(1)
                 features = features.view(batch_size, n_crops, -1).mean(1)
                 gallery_features_list.extend(features)
                 gallery_path_list.extend(gallery_paths)
@@ -137,14 +138,12 @@ def main():
                 # fuse batch size and ncrops
                 features, _ = model(data.view(-1, c, h, w))
                 # avg over crops
-                # output = output.view(batch_size, n_crops, -1).mean(1)
                 features = features.view(batch_size, n_crops, -1).mean(1)
                 query_features_list.extend(features)
                 query_path_list.extend(query_paths)
         # end of for
 
         # F.cosine_similarity()
-
         # # matching
         top_indices = match(gallery_features_list, query_features_list)
         #

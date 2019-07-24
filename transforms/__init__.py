@@ -42,8 +42,8 @@ def get_transform(dataset, large_test_crop=False):
             normalize,
         ])
         transform_val = Compose([
-            # Resize(180),
-            # CenterCrop(180),
+            # Resize(224),
+            # CenterCrop(210),
             # ToTensor(),
             # normalize,
 
@@ -54,8 +54,8 @@ def get_transform(dataset, large_test_crop=False):
             Lambda(lambda crops: torch.stack([normalize(ToTensor()(crop)) for crop in crops])),
         ])
         transform_test = Compose([
-            # Resize(180),
-            # CenterCrop(180),
+            # Resize(224),
+            # CenterCrop(210),
             # ToTensor(),
             # normalize,
 
