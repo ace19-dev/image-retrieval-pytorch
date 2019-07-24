@@ -1,268 +1,137 @@
-'''
-input: image - [1, FLAGS.num_views, FLAGS.height, FLAGS.width, 3]
-output: nearest neighbor image. apply deep cosine metric
-        TODO: how build a candiate images to compare in all data? or
-        TODO: just find a one of them which is included input image categories?
+#
+# Inference
+#
 
-When training is finished,
-the classifier is stripped of the network and distance queries are
-made using cosine similarity or Euclidean distance on the final layer of the network.
-
-Deep metric learning approaches encode notion of similarity directly into the training objective.
-
-When the feature encoder is trained with the classifier jointly by minimization of the
-cross-entropy loss, the parameters of the encoder network are adapted to
-push samples away from the decision boundary as far as possible.
-
-Cosine Softmax Classifier
-
-The final l2 normalization projects features onto the unit hypersphere
-for application of the cosine softmax classifier.
-
-'''
-
-import cv2
-import matplotlib.pyplot as plt
-
-import datetime
+from __future__ import print_function
 import os
-import csv
+import cv2
 import numpy as np
+from tqdm import tqdm
+import csv
 
-import tensorflow as tf
+import torch
+import torch.nn as nn
+from torch.utils.data import DataLoader
 
-from retrieval import retrieval_data, matching
-from utils import aug_utils
-import model
-
-
-slim = tf.contrib.slim
-
-flags = tf.app.flags
-FLAGS = flags.FLAGS
-
-
-# Dataset settings.
-flags.DEFINE_string('dataset_dir',
-                    '/home/ace19/dl_data/modelnet',
-                    'Where the dataset reside.')
-
-flags.DEFINE_string('output_dir',
-                    '/home/ace19/dl_data/modelnet/retrieval_result',
-                    'Where the dataset reside.')
-
-flags.DEFINE_string('checkpoint_path',
-                    '../models',
-                    'Directory where to read training checkpoints.')
-
-flags.DEFINE_integer('batch_size', 32, 'batch size')
-flags.DEFINE_integer('height', 224, 'height')
-flags.DEFINE_integer('width', 224, 'width')
-flags.DEFINE_string('labels',
-                    'airplane,bed,bookshelf,toilet,vase',
-                    'number of classes')
-
-# retrieval params
-flags.DEFINE_float('max_cosine_distance', 0.2,
-                   'Gating threshold for cosine distance')
-flags.DEFINE_string('nn_budget', None,
-                    'Maximum size of the appearance descriptors gallery. '
-                    'If None, no budget is enforced.')
+import datasets
+from models import model_zoo
+import transforms
+from option import Options
 
 
-MODELNET_GALLERY_SIZE = 2525
-MODELNET_QUERY_SIZE = 25
-
-NUM_TOP = 3
-
-
-# TODO
-def display_retrieval(top_indices, gallery_path_list, query_path_list):
-    tf.logging.info('write retrieval -> \n')
-    top_indi_list = top_indices.tolist()
-    for idx, indice in enumerate(top_indi_list):
-        query = query_path_list[idx]
-        tf.logging.info('query %d ==> %s ' % (idx, query))
-        gallery = gallery_path_list[indice]
-        tf.logging.info('gallery %d indice ==> %s ' % (indice, gallery))
-        tf.logging.info('++++++++++++\n')
-
-    # settings
-    w, h = 30, 30  # for raster image
-    columns = 8
-    rows = 2
-
-    tf.logging.info('display images -> \n')
-    top_indi_list = top_indices.tolist()
-    for idx, indice in enumerate(top_indi_list):
-        fig = plt.figure(figsize=(w,h))
-        # fig.suptitle("Query images and Gallery images", fontsize=16)
-
-        query = query_path_list[idx]
-        # subplot1 = fig.add_subplot(111)
-        p = query[0].decode("utf-8")
-        title = p.split('/')[-1].split('.')[0]
-        # subplot1.set_title('query_' + str(idx) + 'th [' + title + ']')
-        ax = []
-        for i, path in enumerate(query):
-            path = path.decode("utf-8")
-            img = cv2.imread(path)
-            # create subplot and append to ax
-            ax.append(fig.add_subplot(rows, columns, i+1))
-            label = path.split('/')[-1]
-            ax[-1].set_title(label)  # set title
-            plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
-
-        gallery = gallery_path_list[indice]
-        # subplot2 = fig.add_subplot(111)
-        # p2 = gallery[0].decode("utf-8")
-        # title2 = p2.split('/')[-1].split('.')[0]
-        # subplot2.set_title('gallery_' + str(indice) + 'th [' + title2 + ']')
-        ax2 = []
-        for j, path2 in enumerate(gallery):
-            path2 = path2.decode("utf-8")
-            img2 = cv2.imread(path2)
-            # create subplot and append to ax
-            ax2.append(fig.add_subplot(rows, columns, i+1+j+1))
-            label2 = path2.split('/')[-1]
-            ax2[-1].set_title(label2)  # set title
-            plt.imshow(cv2.cvtColor(img2, cv2.COLOR_BGR2RGB))
-
-        plt.tight_layout()
-        plt.savefig(os.path.join(FLAGS.output_dir, 'query-' + title))
-        plt.show()
-        plt.close(fig)
+# global variable
+best_pred = 0.0
+acclist_train = []
+acclist_val = []
 
 
-# TODO: get value from indices
-# TODO: get top-N indices
-def match(galleries, queries):
-    # The distance metric used for measurement to query.
-    metric = matching.NearestNeighborDistanceMetric("cosine", FLAGS.max_cosine_distance)
-    distance_matrix = metric.distance(queries, galleries)
-    top_indice = np.argmin(distance_matrix, axis=1)
+def main():
+    # init the args
+    global best_pred, acclist_train, acclist_val
+    args = Options().parse()
 
-    # get value from indice
-    # idx = np.argpartition(a, range(M))[:, :-M - 1:-1]  # topM_ind
-    # out = a[np.arange(a.shape[0])[:, None], idx]  # topM_score
-    # out_top1 = matrix[np.arange(matrix.shape[0])[:, None], top_indice]
-    return top_indice
+    args.cuda = not args.no_cuda and torch.cuda.is_available()
+    print(args)
+    torch.manual_seed(args.seed)
+    if args.cuda:
+        torch.cuda.manual_seed(args.seed)
 
-    # Top-N indices
-    # top_indices = np.argpartition(matrix, NUM_TOP, axis=1)[:, :NUM_TOP]
-    # return top_indices
+    _, _, transform_infer = transforms.get_transform(args.dataset)
+    galleryset = datasets.get_dataset(args.dataset,
+                                    root='/home/ace19/dl_data/materials/train',
+                                    transform=transform_infer)
+    queryset = datasets.get_dataset(args.dataset,
+                                     split='eval',
+                                     root='/home/ace19/dl_data/materials/query',
+                                     transform=transform_infer)
+    gallery_loader = DataLoader(
+        galleryset, batch_size=args.batch_size, num_workers=args.workers)
+    query_loader = torch.utils.data.DataLoader(
+        queryset, batch_size=args.test_batch_size, num_workers=args.workers)
 
+    # init the model
+    model = model_zoo.get_model(args.model)
+    print(model)
 
-def main(unused_argv):
-    tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.INFO)
+    if args.cuda:
+        model.cuda()
+        # Please use CUDA_VISIBLE_DEVICES to control the number of gpus
+        model = nn.DataParallel(model)
 
-    labels = FLAGS.labels.split(',')
-    num_classes = len(labels)
-
-    # Define the model
-    X = tf.placeholder(tf.float32,
-                       [None, FLAGS.num_views, FLAGS.height, FLAGS.width, 3],
-                       name='X')
-
-    _, features = model.deep_cosine_metric_learning(X,
-                                                    num_classes,
-                                                    is_training=False,
-                                                    keep_prob=1.0,
-                                                    attention_module='se_block')
-
-    # Prepare query source data
-    tfrecord_filenames = tf.placeholder(tf.string, shape=[])
-    _dataset = retrieval_data.Dataset(tfrecord_filenames,
-                                      FLAGS.num_views,
-                                      FLAGS.height,
-                                      FLAGS.width,
-                                      FLAGS.batch_size)
-    iterator = _dataset.dataset.make_initializable_iterator()
-    next_batch = iterator.get_next()
-
-    sess_config = tf.ConfigProto(gpu_options=tf.GPUOptions(allow_growth=True))
-    with tf.Session(config=sess_config) as sess:
-        sess.run(tf.global_variables_initializer())
-
-        # Create a saver object which will save all the variables
-        saver = tf.train.Saver()
-        if tf.gfile.IsDirectory(FLAGS.checkpoint_path):
-            checkpoint_path = tf.train.latest_checkpoint(FLAGS.checkpoint_path)
+    # check point
+    if args.checkpoint is not None:
+        if os.path.isfile(args.checkpoint):
+            print("=> loading checkpoint '{}'".format(args.checkpoint))
+            checkpoint = torch.load(args.checkpoint)
+            args.start_epoch = checkpoint['epoch'] + 1
+            best_pred = checkpoint['best_pred']
+            acclist_train = checkpoint['acclist_train']
+            acclist_val = checkpoint['acclist_val']
+            model.module.load_state_dict(checkpoint['state_dict'])
+            print("=> loaded checkpoint '{}' (epoch {})"
+                  .format(args.checkpoint, checkpoint['epoch']))
         else:
-            checkpoint_path = FLAGS.checkpoint_path
-        saver.restore(sess, checkpoint_path)
-
-        # global_step = checkpoint_path.split('/')[-1].split('-')[-1]
-
-        # Get the number of training/validation steps per epoch
-        batches_gallery = int(MODELNET_GALLERY_SIZE / FLAGS.batch_size)
-        if MODELNET_GALLERY_SIZE % FLAGS.batch_size > 0:
-            batches_gallery += 1
-        batches_query = int(MODELNET_QUERY_SIZE / FLAGS.batch_size)
-        if MODELNET_QUERY_SIZE % FLAGS.batch_size > 0:
-            batches_query += 1
-
-        gallery_tf_filenames = os.path.join(FLAGS.dataset_dir, 'gallery.record')
-        query_tf_filenames = os.path.join(FLAGS.dataset_dir, 'query.record')
-
-        # TODO: +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        # TODO: It is better to create encode func which replace below codes
-        # TODO: +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-        # gallery images
-        gallery_features_list = []
-        gallery_path_list = []
-        sess.run(iterator.initializer, feed_dict={tfrecord_filenames: gallery_tf_filenames})
-        for i in range(batches_gallery):
-            gallery_batch_xs, gallery_paths = sess.run(next_batch)
-            # # Verify image
-            # n_batch = gallery_batch_xs.shape[0]
-            # for i in range(n_batch):
-            #     img = gallery_batch_xs[i]
-            #     # scipy.misc.toimage(img).show()
-            #     # Or
-            #     img = cv2.cvtColor(img.astype(np.uint8), cv2.COLOR_BGR2RGB)
-            #     cv2.imwrite('/home/ace19/Pictures/' + str(i) + '.png', img)
-            #     # cv2.imshow(str(fnames), img)
-            #     cv2.waitKey(100)
-            #     cv2.destroyAllWindows()
-
-            augmented_batch_xs = aug_utils.aug(gallery_batch_xs)
-
-            # (10,512)
-            _f = sess.run(features, feed_dict={X: augmented_batch_xs})
-            gallery_features_list.extend(_f)
-            gallery_path_list.extend(gallery_paths)
-
-        # query images
-        query_features_list = []
-        query_path_list = []
-        sess.run(iterator.initializer, feed_dict={tfrecord_filenames: query_tf_filenames})
-        for i in range(batches_query):
-            query_batch_xs, query_paths = sess.run(next_batch)
-            # # Verify image
-            # n_batch = query_batch_xs.shape[0]
-            # for i in range(n_batch):
-            #     img = query_batch_xs[i]
-            #     # scipy.misc.toimage(img).show()
-            #     # Or
-            #     img = cv2.cvtColor(img.astype(np.uint8), cv2.COLOR_BGR2RGB)
-            #     cv2.imwrite('/home/ace19/Pictures/' + str(i) + '.png', img)
-            #     # cv2.imshow(str(fnames), img)
-            #     cv2.waitKey(100)
-            #     cv2.destroyAllWindows()
-
-            # (10,512)
-            _f = sess.run(features, feed_dict={X: query_batch_xs})
-            query_features_list.extend(_f)
-            query_path_list.extend(query_paths)
-
-        # matching
-        top_indices = match(gallery_features_list, query_features_list)
-
-        # display top 5 image correspond to target
-        display_retrieval(top_indices, gallery_path_list, query_path_list)
+            raise RuntimeError("=> no infer checkpoint found at '{}'". \
+                               format(args.checkpoint))
+    else:
+        raise RuntimeError("=> config \'args.checkpoint\' is '{}'". \
+                           format(args.checkpoint))
 
 
-if __name__ == '__main__':
-    tf.compat.v1.app.run()
+    gallery_features_list = []
+    gallery_path_list = []
+    query_features_list = []
+    query_path_list = []
+    def retrieval():
+        model.eval()
+
+        print(" ==> Load gallery ... ")
+        tbar = tqdm(gallery_loader, desc='\r')
+        for batch_idx, (gallery_paths, data, gt) in enumerate(tbar):
+            if args.cuda:
+                data, gt = data.cuda(), gt.cuda()
+
+            with torch.no_grad():
+                # output = model(data)
+                # TTA
+                batch_size, n_crops, c, h, w = data.size()
+                # fuse batch size and ncrops
+                output = model(data.view(-1, c, h, w))
+                # avg over crops
+                # output = output.view(batch_size, n_crops, -1).mean(1)
+                features = output.get_features().view(batch_size, n_crops, -1).mean(1)
+                gallery_features_list.extend(features)
+                gallery_path_list.extend(gallery_paths)
+        # end of for
+
+        print(" ==> Load query ... ")
+        tbar = tqdm(query_loader, desc='\r')
+        for batch_idx, (query_paths, data) in enumerate(tbar):
+            if args.cuda:
+                data = data.cuda()
+
+            with torch.no_grad():
+                # TTA
+                batch_size, n_crops, c, h, w = data.size()
+                # fuse batch size and ncrops
+                output = model(data.view(-1, c, h, w))
+                # avg over crops
+                # output = output.view(batch_size, n_crops, -1).mean(1)
+                features = output.get_features().view(batch_size, n_crops, -1).mean(1)
+                gallery_features_list.extend(features)
+                query_features_list.extend(output.get_features())
+                query_path_list.extend(query_paths)
+        # end of for
+
+
+        # # matching
+        # top_indices = match(gallery_features_list, query_features_list)
+        #
+        # # display top 5 image correspond to target
+        # display_retrieval(top_indices, gallery_path_list, query_path_list)
+
+    retrieval()
+
+
+if __name__ == "__main__":
+    main()
