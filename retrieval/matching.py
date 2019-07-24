@@ -1,5 +1,7 @@
 import numpy as np
 
+import torch.nn.functional as F
+
 
 def _pdist(a, b):
     """Compute pair-wise squared distance between points in `a` and `b`.
@@ -14,7 +16,7 @@ def _pdist(a, b):
     Returns
     -------
     ndarray
-        Returns a matrix of size len(a), len(b) such that eleement (i, j)
+        Returns a matrix of size len(a), len(b) such that element (i, j)
         contains the squared distance between `a[i]` and `b[j]`.
 
     """
@@ -25,6 +27,7 @@ def _pdist(a, b):
     r2 = -2. * np.dot(a, b.T) + a2[:, None] + b2[None, :]
     r2 = np.clip(r2, 0., float(np.inf))
     return r2
+
 
 # TODO: modify
 def _cosine_distance(a, b, data_is_normalized=False):
@@ -49,10 +52,12 @@ def _cosine_distance(a, b, data_is_normalized=False):
     """
     if not data_is_normalized:
         # To avoid RuntimeWarning: invalid value encountered in true_divide import numpy as np
-        a_norm = np.linalg.norm(a, axis=1, keepdims=True)
-        a = np.asarray(a) / np.where(a_norm==0, 1, a_norm)
-        b_norm = np.linalg.norm(b, axis=1, keepdims=True)
-        b = np.asarray(b) / np.where(b_norm==0, 1, b_norm)
+        # a_normed = np.linalg.norm(a, axis=1, keepdims=True)
+        a_normed = F.normalize(a, p=2, dim=1, eps=1e-8)
+        a = np.asarray(a) / np.where(a_normed==0, 1, a_normed)
+        b_normed = np.linalg.norm(b, axis=1, keepdims=True)
+        # b_normed = F.normalize(a, p=2, dim=1, eps=1e-8)
+        b = np.asarray(b) / np.where(b_normed==0, 1, b_normed)
     else:
         a = np.asarray(a)
         b = np.asarray(b)
@@ -126,9 +131,7 @@ class NearestNeighborDistanceMetric(object):
 
     """
 
-    def __init__(self, metric, matching_threshold, budget=None):
-
-
+    def __init__(self, metric, matching_threshold, budget=0.2):
         if metric == "euclidean":
             self._metric = _nn_euclidean_distance
         elif metric == "cosine":
@@ -137,7 +140,7 @@ class NearestNeighborDistanceMetric(object):
             raise ValueError(
                 "Invalid metric; must be either 'euclidean' or 'cosine'")
         self.matching_threshold = matching_threshold
-        self.budget = budget
+        self.budget = budget    # Gating threshold for cosine distance
         self.samples = {}
 
     def distance(self, queries, galleries):

@@ -75,10 +75,6 @@ class Product_Cosine_Softmax(nn.Module):
         return num_feature
 
 
-    def get_features(self):
-        return self.features
-
-
     def forward(self, x):
         _, _, h, w = x.size()
         x = self.pretrained.conv1(x)
@@ -97,15 +93,15 @@ class Product_Cosine_Softmax(nn.Module):
         x = F.dropout2d(x, p=0.8)
         x = self.fc(x)
 
-        self.features = x
+        features = x
         # Features in rows, normalize axis 1.
-        self.features = F.normalize(self.features, p=2, dim=1, eps=1e-8)
+        features = F.normalize(features, p=2, dim=1, eps=1e-8)
 
         # Mean vectors in colums, normalize axis 0.
         weights_normed = F.normalize(self.weights, p=2, dim=0, eps=1e-8)
-        logits = self.scale.cuda() * torch.mm(self.features.cuda(), weights_normed.cuda())     # torch.matmul
+        logits = self.scale.cuda() * torch.mm(features.cuda(), weights_normed.cuda())     # torch.matmul
 
-        return logits
+        return features, logits
 
 
 def product_resnet50(backbone_pretrained=False, **kwargs):

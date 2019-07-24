@@ -1,8 +1,5 @@
-#
-# Inference
-#
-
 from __future__ import print_function
+
 import os
 import cv2
 import numpy as np
@@ -11,6 +8,7 @@ import csv
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from torch.utils.data import DataLoader
 
 import datasets
@@ -18,11 +16,33 @@ from models import model_zoo
 import transforms
 from option import Options
 
+import retrieval.matching as matching
+
 
 # global variable
 best_pred = 0.0
 acclist_train = []
 acclist_val = []
+
+
+
+# TODO: get value from indices
+# TODO: get top-N indices
+def match(galleries, queries):
+    # The distance metric used for measurement to query.
+    metric = matching.NearestNeighborDistanceMetric("cosine")
+    distance_matrix = metric.distance(queries, galleries)
+    top_indice = np.argmin(distance_matrix, axis=1)
+
+    # get value from indice
+    # idx = np.argpartition(a, range(M))[:, :-M - 1:-1]  # topM_ind
+    # out = a[np.arange(a.shape[0])[:, None], idx]  # topM_score
+    # out_top1 = matrix[np.arange(matrix.shape[0])[:, None], top_indice]
+    return top_indice
+
+    # Top-N indices
+    # top_indices = np.argpartition(matrix, NUM_TOP, axis=1)[:, :NUM_TOP]
+    # return top_indices
 
 
 def main():
@@ -92,14 +112,15 @@ def main():
                 data, gt = data.cuda(), gt.cuda()
 
             with torch.no_grad():
-                # output = model(data)
+                # _, output = model(data)
+
                 # TTA
                 batch_size, n_crops, c, h, w = data.size()
                 # fuse batch size and ncrops
-                output = model(data.view(-1, c, h, w))
+                features, _ = model(data.view(-1, c, h, w))
                 # avg over crops
                 # output = output.view(batch_size, n_crops, -1).mean(1)
-                features = output.get_features().view(batch_size, n_crops, -1).mean(1)
+                features = features.view(batch_size, n_crops, -1).mean(1)
                 gallery_features_list.extend(features)
                 gallery_path_list.extend(gallery_paths)
         # end of for
@@ -114,18 +135,18 @@ def main():
                 # TTA
                 batch_size, n_crops, c, h, w = data.size()
                 # fuse batch size and ncrops
-                output = model(data.view(-1, c, h, w))
+                features, _ = model(data.view(-1, c, h, w))
                 # avg over crops
                 # output = output.view(batch_size, n_crops, -1).mean(1)
-                features = output.get_features().view(batch_size, n_crops, -1).mean(1)
-                gallery_features_list.extend(features)
-                query_features_list.extend(output.get_features())
+                features = features.view(batch_size, n_crops, -1).mean(1)
+                query_features_list.extend(features)
                 query_path_list.extend(query_paths)
         # end of for
 
+        # F.cosine_similarity()
 
         # # matching
-        # top_indices = match(gallery_features_list, query_features_list)
+        top_indices = match(gallery_features_list, query_features_list)
         #
         # # display top 5 image correspond to target
         # display_retrieval(top_indices, gallery_path_list, query_path_list)

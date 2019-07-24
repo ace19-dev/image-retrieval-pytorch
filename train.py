@@ -117,7 +117,7 @@ def main():
                 # data, target = Variable(data), Variable(target)
             # compute gradient and do SGD step
             optimizer.zero_grad()
-            output = model(data)
+            _, output = model(data)
             loss = criterion(output, target)
             loss.backward()
             optimizer.step()
@@ -153,12 +153,12 @@ def main():
                 data, target = data.cuda(), target.cuda()
                 # data, target = Variable(data), Variable(target)
             with torch.no_grad():
-                # output = model(data)
+                # _, output = model(data)
 
                 # TTA
                 batch_size, n_crops, c, h, w = data.size()
                 # fuse batch size and ncrops
-                output = model(data.view(-1, c, h, w))
+                _, output = model(data.view(-1, c, h, w))
                 # avg over crops
                 output = output.view(batch_size, n_crops, -1).mean(1)
                 # accuracy
