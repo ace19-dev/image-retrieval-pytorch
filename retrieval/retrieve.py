@@ -105,7 +105,7 @@ def main():
     def retrieval():
         model.eval()
 
-        print(" ==> Load gallery ... ")
+        print(" ==> Loading gallery ... ")
         tbar = tqdm(gallery_loader, desc='\r')
         for batch_idx, (gallery_paths, data, gt) in enumerate(tbar):
             if args.cuda:
@@ -126,7 +126,7 @@ def main():
                 gallery_path_list.extend(gallery_paths)
         # end of for
 
-        print(" ==> Load query ... ")
+        print(" ==> Loading query ... ")
         tbar = tqdm(query_loader, desc='\r')
         for batch_idx, (query_paths, data) in enumerate(tbar):
             if args.cuda:
