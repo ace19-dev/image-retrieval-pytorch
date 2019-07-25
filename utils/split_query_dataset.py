@@ -15,22 +15,25 @@ import tensorflow as tf
 
 FLAGS = None
 
+MAX = 5
+
 
 def main(_):
     tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.INFO)
 
-    img_lst = os.listdir(FLAGS.original_dir)
-    random.shuffle(img_lst)
-    # img_lst.sort()
-    # print(img_lst)
+    cls_lst = os.listdir(FLAGS.original_dir)
+    for cls in cls_lst:
+        cls_path = os.path.join(FLAGS.original_dir, cls)
+        img_lst = os.listdir(cls_path)
+        random.shuffle(img_lst)
 
-    for idx, img in enumerate(img_lst):
-        if idx >= 200:
-            break
+        for idx, img in enumerate(img_lst):
+            if idx >= MAX:
+                break
 
-        old_img_path = os.path.join(FLAGS.original_dir,img)
-        img_path = os.path.join(FLAGS.target_dir, img)
-        shutil.copyfile(old_img_path, img_path)
+            old_img_path = os.path.join(cls_path, img)
+            new_img_path = os.path.join(FLAGS.target_dir, img)
+            shutil.copyfile(old_img_path, new_img_path)
 
 
 if __name__ == '__main__':
@@ -38,7 +41,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '--original_dir',
         type=str,
-        default='/home/ace19/dl_data/materials/test',
+        default='/home/ace19/dl_data/materials/validation',
         help='Where is image to load.')
     parser.add_argument(
         '--target_dir',
