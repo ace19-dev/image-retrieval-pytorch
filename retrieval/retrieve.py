@@ -66,7 +66,7 @@ def show_retrieval_result(top_n_indice, top_n_distance, gallery_path_list, query
     col = top_n_indice.shape[1]
     for row_idx, query_img_path in enumerate(query_path_list):
         fig, axes = plt.subplots(ncols=6, figsize=(12, 4))
-        fig.subtitle(query_img_path.split('/')[-1], fontsize=12, fontweight='bold')
+        fig.suptitle(query_img_path.split('/')[-1], fontsize=12, fontweight='bold')
         axes[0].imshow(Image.open(query_img_path))
 
         for i in range(col):
