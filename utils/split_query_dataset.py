@@ -15,20 +15,24 @@ import tensorflow as tf
 
 FLAGS = None
 
-MAX = 5
+MAX_PER_CLASSES = 5
+NUM_CLASSES = 10
 
 
 def main(_):
     tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.INFO)
 
     cls_lst = os.listdir(FLAGS.original_dir)
-    for cls in cls_lst:
+    for i, cls in enumerate(cls_lst):
+        if i >= NUM_CLASSES:
+            break
+
         cls_path = os.path.join(FLAGS.original_dir, cls)
         img_lst = os.listdir(cls_path)
         random.shuffle(img_lst)
 
         for idx, img in enumerate(img_lst):
-            if idx >= MAX:
+            if idx >= MAX_PER_CLASSES:
                 break
 
             old_img_path = os.path.join(cls_path, img)

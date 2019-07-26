@@ -11,8 +11,8 @@ class Options():
         parser.add_argument('--model', type=str, default='product_cosine_softmax',
             help='network model type (default: densenet)')
         parser.add_argument('--pretrained', type=str,
-                            # default=None,
-                            default='pre-trained/model_best.pth.tar',
+                            default=None,
+                            # default='pre-trained/model_best.pth.tar',
                             help='load pretrianed mode')
         parser.add_argument('--nclass', type=int, default=60, metavar='N',
             help='number of classes (default: 10)')
@@ -46,8 +46,8 @@ class Options():
             help='random seed (default: 1)')
         # checking point
         parser.add_argument('--checkpoint', type=str,
-                            default=None,
-                            # default='../runs/product/product_cosine_softmax/default/model_best.pth.tar',
+                            # default=None,
+                            default='../runs/product/product_cosine_softmax/default/model_best.pth.tar',
                             help='put the path to resuming file if needed')
         parser.add_argument('--checkname', type=str, default='default',
             help='set the checkpoint name')

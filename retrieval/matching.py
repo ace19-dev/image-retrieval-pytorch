@@ -50,10 +50,13 @@ def _cosine_distance(a, b, data_is_normalized=False):
         contains the squared distance between `a[i]` and `b[j]`.
 
     """
+    a = a.numpy()
+    b = b.numpy()
+
     if not data_is_normalized:
         # To avoid RuntimeWarning: invalid value encountered in true_divide import numpy as np
-        # a_normed = np.linalg.norm(a, axis=1, keepdims=True)
-        a_normed = F.normalize(a, p=2, dim=1, eps=1e-8)
+        a_normed = np.linalg.norm(a, axis=1, keepdims=True)
+        # a_normed = F.normalize(a, p=2, dim=1, eps=1e-8)
         a = np.asarray(a) / np.where(a_normed==0, 1, a_normed)
         b_normed = np.linalg.norm(b, axis=1, keepdims=True)
         # b_normed = F.normalize(a, p=2, dim=1, eps=1e-8)
@@ -131,7 +134,7 @@ class NearestNeighborDistanceMetric(object):
 
     """
 
-    def __init__(self, metric, matching_threshold, budget=0.2):
+    def __init__(self, metric, matching_threshold=0.5, budget=0.2):
         if metric == "euclidean":
             self._metric = _nn_euclidean_distance
         elif metric == "cosine":

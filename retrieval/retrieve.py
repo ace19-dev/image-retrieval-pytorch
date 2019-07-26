@@ -58,7 +58,7 @@ def main():
 
     _, _, transform_infer = transforms.get_transform(args.dataset)
     galleryset = datasets.get_dataset(args.dataset,
-                                    root='/home/ace19/dl_data/materials/train',
+                                    root='/home/ace19/dl_data/materials/gallery',
                                     transform=transform_infer)
     queryset = datasets.get_dataset(args.dataset,
                                      split='eval',
@@ -143,9 +143,10 @@ def main():
                 query_path_list.extend(query_paths)
         # end of for
 
-        # F.cosine_similarity()
         # # matching
-        top_indices = match(gallery_features_list, query_features_list)
+        top_indices = match(torch.stack(gallery_features_list).cpu(),
+                            torch.stack(query_features_list).cpu())
+        print('#####')
         #
         # # display top 5 image correspond to target
         # display_retrieval(top_indices, gallery_path_list, query_path_list)
