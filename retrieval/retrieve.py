@@ -65,11 +65,14 @@ def match_n(top_n, galleries, queries):
 def show_retrieval_result(top_n_indice, top_n_distance, gallery_path_list, query_path_list):
     col = top_n_indice.shape[1]
     for row_idx, query_img_path in enumerate(query_path_list):
-        fig, axes = plt.subplots(ncols=6, figsize=(300, 300))
+        fig, axes = plt.subplots(ncols=6, figsize=(12, 4))
+        fig.subtitle(query_img_path.split('/')[-1], fontsize=12, fontweight='bold')
         axes[0].imshow(Image.open(query_img_path))
 
         for i in range(col):
-            axes[i+1].imshow(Image.open(gallery_path_list[top_n_indice[row_idx, i]]))
+            img_path = gallery_path_list[top_n_indice[row_idx, i]]
+            axes[i+1].set_title(img_path.split('/')[-1])
+            axes[i+1].imshow(Image.open(img_path))
         # plt.show()
         fig.savefig(os.path.join(RESULT_PATH, query_img_path.split('/')[-1]))
         plt.close()
@@ -89,7 +92,7 @@ def main():
 
     _, _, transform_infer = transforms.get_transform(args.dataset)
     galleryset = datasets.get_dataset(args.dataset,
-                                    root='/home/ace19/dl_data/materials/gallery',
+                                    root='/home/ace19/dl_data/materials/train',
                                     transform=transform_infer)
     queryset = datasets.get_dataset(args.dataset,
                                      split='eval',

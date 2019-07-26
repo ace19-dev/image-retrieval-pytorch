@@ -24,8 +24,8 @@ def main(_):
 
     cls_lst = os.listdir(FLAGS.original_dir)
     for i, cls in enumerate(cls_lst):
-        if i >= NUM_CLASSES:
-            break
+        # if i >= NUM_CLASSES:
+        #     break
 
         cls_path = os.path.join(FLAGS.original_dir, cls)
         img_lst = os.listdir(cls_path)
