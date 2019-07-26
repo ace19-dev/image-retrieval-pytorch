@@ -6,6 +6,9 @@ import numpy as np
 from tqdm import tqdm
 import csv
 
+import matplotlib.pyplot as plt
+from PIL import Image
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -25,24 +28,52 @@ acclist_train = []
 acclist_val = []
 
 
+TOP_N = 5
+RESULT_PATH = '/home/ace19/dl_result/image_retrieve/_result'
 
-# TODO: get value from indices
-# TODO: get top-N indices
-def match(galleries, queries):
+
+def _print_distances(distance_matrix, top_n_indice):
+    distances = []
+    num_row, num_col = top_n_indice.shape
+    for r in range(num_row):
+        col = []
+        for c in range(num_col):
+            col.append(distance_matrix[r, top_n_indice[r,c]])
+        distances.append(col)
+
+    return distances
+
+
+def match_n(top_n, galleries, queries):
     # The distance metric used for measurement to query.
     metric = matching.NearestNeighborDistanceMetric("cosine")
     distance_matrix = metric.distance(queries, galleries)
-    top_indice = np.argmin(distance_matrix, axis=1)
 
-    # get value from indice
-    # idx = np.argpartition(a, range(M))[:, :-M - 1:-1]  # topM_ind
-    # out = a[np.arange(a.shape[0])[:, None], idx]  # topM_score
-    # out_top1 = matrix[np.arange(matrix.shape[0])[:, None], top_indice]
-    return top_indice
+    # top_indice = np.argmin(distance_matrix, axis=1)
+    # top_n_indice = np.argpartition(distance_matrix, top_n, axis=1)[:, :top_n]
+    # top_n_dist = _print_distances(distance_matrix, top_n_indice)
+    # top_n_indice2 = np.argsort(top_n_dist, axis=1)
+    # dist2 = _print_distances(distance_matrix, top_n_indice2)
 
-    # Top-N indices
-    # top_indices = np.argpartition(matrix, NUM_TOP, axis=1)[:, :NUM_TOP]
-    # return top_indices
+    # TODO: need improvement.
+    top_n_indice = np.argsort(distance_matrix, axis=1)[:, :top_n]
+    top_n_distance = _print_distances(distance_matrix, top_n_indice)
+
+    return top_n_indice, top_n_distance
+
+
+def show_retrieval_result(top_n_indice, top_n_distance, gallery_path_list, query_path_list):
+    col = top_n_indice.shape[1]
+    for row_idx, query_img_path in enumerate(query_path_list):
+        fig, axes = plt.subplots(ncols=6, figsize=(300, 300))
+        axes[0].imshow(Image.open(query_img_path))
+
+        for i in range(col):
+            axes[i+1].imshow(Image.open(gallery_path_list[top_n_indice[row_idx, i]]))
+        # plt.show()
+        fig.savefig(os.path.join(RESULT_PATH, query_img_path.split('/')[-1]))
+        plt.close()
+
 
 
 def main():
@@ -144,12 +175,13 @@ def main():
         # end of for
 
         # # matching
-        top_indices = match(torch.stack(gallery_features_list).cpu(),
-                            torch.stack(query_features_list).cpu())
-        print('#####')
-        #
-        # # display top 5 image correspond to target
-        # display_retrieval(top_indices, gallery_path_list, query_path_list)
+        top_n_indice, top_n_distance = \
+            match_n(TOP_N,
+                    torch.stack(gallery_features_list).cpu(),
+                    torch.stack(query_features_list).cpu())
+
+        # Show n images from the gallery similar to the query image.
+        show_retrieval_result(top_n_indice, top_n_distance, gallery_path_list, query_path_list)
 
     retrieval()
 
