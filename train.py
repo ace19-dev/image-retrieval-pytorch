@@ -107,14 +107,13 @@ def main():
         for batch_idx, (_, data, target) in enumerate(tbar):
             scheduler(optimizer, batch_idx, epoch, best_pred)
             # display_data(data)
-
             # TODO: Convert from list of 3D to 4D
             # data = np.stack(data, axis=1)
             # data = torch.from_numpy(data)
 
             if args.cuda:
                 data, target = data.cuda(), target.cuda()
-                # data, target = Variable(data), Variable(target)
+
             # compute gradient and do SGD step
             optimizer.zero_grad()
             _, output = model(data)

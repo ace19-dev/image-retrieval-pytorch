@@ -28,7 +28,7 @@ class Options():
         parser.add_argument('--workers', type=int, default=16,
             metavar='N', help='dataloader threads')
         # lr setting
-        parser.add_argument('--lr', type=float, default=0.03, metavar='LR',
+        parser.add_argument('--lr', type=float, default=0.05, metavar='LR',
             help='learning rate (default: 0.1)')
         parser.add_argument('--lr-scheduler', type=str, default='cos',
             help='learning rate scheduler (default: cos)')
@@ -46,8 +46,8 @@ class Options():
             help='random seed (default: 1)')
         # checking point
         parser.add_argument('--checkpoint', type=str,
-                            # default=None,
-                            default='../runs/product/product_cosine_softmax/default/model_best.pth.tar',
+                            default=None,
+                            # default='../runs/product/product_cosine_softmax/default/model_best.pth.tar',
                             help='put the path to resuming file if needed')
         parser.add_argument('--checkname', type=str, default='default',
             help='set the checkpoint name')
