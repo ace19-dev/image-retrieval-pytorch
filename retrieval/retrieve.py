@@ -4,7 +4,6 @@ import os
 import cv2
 import numpy as np
 from tqdm import tqdm
-import csv
 
 import matplotlib.pyplot as plt
 from PIL import Image
@@ -75,6 +74,7 @@ def show_retrieval_result(top_n_indice, top_n_distance, gallery_path_list, query
             axes[i+1].set_title(img_path.split('/')[-1])
             axes[i+1].imshow(Image.open(img_path))
         # plt.show()
+        print(" Retrieval result {} create.".format(row_idx+1))
         fig.savefig(os.path.join(RESULT_PATH, query_img_path.split('/')[-1]))
         plt.close()
 

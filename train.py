@@ -229,7 +229,7 @@ def display_data(data):
     # display image to verify
     data = data.numpy()
     data = np.transpose(data, (0, 2, 3, 1))
-    # # assert not np.any(np.isnan(data))
+    # # assets not np.any(np.isnan(data))
     n_batch = data.shape[0]
     # n_view = train_batch_xs.shape[1]
     for i in range(n_batch):
