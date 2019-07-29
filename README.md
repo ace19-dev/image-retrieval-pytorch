@@ -6,7 +6,7 @@ The upper three row is correct and last is incorrect.
 ![](assets/2362_27.jpg)
 ![](assets/177_4.jpg)
 
-- It might be well retrieved in same category detailly
+- It might also be retrieved in the same category elaborately.
 ![](assets/1428_38.jpg)
 ![](assets/1168_38.jpg)
 ![](assets/1596_38.jpg)
