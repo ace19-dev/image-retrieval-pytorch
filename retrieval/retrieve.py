@@ -177,6 +177,10 @@ def main():
                 query_path_list.extend(query_paths)
         # end of for
 
+        if len(query_features_list) == 0:
+            print('No query data!!')
+            return
+
         # # matching
         top_n_indice, top_n_distance = \
             match_n(TOP_N,
