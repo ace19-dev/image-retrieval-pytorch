@@ -1,5 +1,8 @@
 # Image-Retrieval-PyTorch
-![](assets/mvcnn_framework.png)
+![](assets/127_46.jpg)
+![](assets/4371_8.jpg)
+![](assets/1611_14.jpg)
+![](assets/177_4.jpg)
 
 ## dataset
 - download_images.py (about 20GB) from https://www.kaggle.com/c/imaterialist-challenge-furniture-2018

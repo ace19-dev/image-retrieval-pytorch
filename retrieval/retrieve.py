@@ -79,7 +79,6 @@ def show_retrieval_result(top_n_indice, top_n_distance, gallery_path_list, query
         plt.close()
 
 
-
 def main():
     # init the args
     global best_pred, acclist_train, acclist_val
