@@ -4,6 +4,7 @@ import os
 import cv2
 import numpy as np
 from tqdm import tqdm
+import time
 
 import matplotlib.pyplot as plt
 from PIL import Image
@@ -46,7 +47,11 @@ def _print_distances(distance_matrix, top_n_indice):
 def match_n(top_n, galleries, queries):
     # The distance metric used for measurement to query.
     metric = matching.NearestNeighborDistanceMetric("cosine")
+    start = time.time()
     distance_matrix = metric.distance(queries, galleries)
+    end = time.time()
+    print("distance measure time: {}".format(end-start))
+
 
     # top_indice = np.argmin(distance_matrix, axis=1)
     # top_n_indice = np.argpartition(distance_matrix, top_n, axis=1)[:, :top_n]
@@ -181,7 +186,7 @@ def main():
             print('No query data!!')
             return
 
-        # # matching
+        # matching
         top_n_indice, top_n_distance = \
             match_n(TOP_N,
                     torch.stack(gallery_features_list).cpu(),

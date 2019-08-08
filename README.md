@@ -1,5 +1,5 @@
 # Image-Retrieval-PyTorch
-- The leftmost is the query image and the remaining four which are ordered from left to right by similarity values are the gallery images. 
+- The leftmost is the query image. The remaining four images is from gallery which are ordered from left to right with similarity values. 
 The upper three row are correct and last row is incorrect.
 ![](assets/127_46.jpg)
 ![](assets/4371_8.jpg)
