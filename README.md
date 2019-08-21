@@ -22,6 +22,8 @@ The upper three row are correct retrieval and last row is incorrect retrieval.
 - https://arxiv.org/abs/1807.00537
   - SphereReID: Deep Hypersphere Manifold Embedding for Person Re-Identification
   - learn a hypersphere manifold embedding
+  - propose a convolutional neural network called SphereReID adopting Sphere Softmax
+  - https://github.com/CoinCheung/SphereReID
 - https://arxiv.org/abs/1801.09414
   - CosFace: Large Margin Cosine Loss for Deep Face Recognition
 - https://github.com/layumi/Person_reID_baseline_pytorch
