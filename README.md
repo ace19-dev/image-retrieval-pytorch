@@ -18,3 +18,11 @@ The upper three row are correct retrieval and last row is incorrect retrieval.
 
 ## References from 
 - https://arxiv.org/abs/1812.00442
+  - Deep Cosine Metric Learning for Person Re-Identification
+- https://arxiv.org/abs/1807.00537
+  - SphereReID: Deep Hypersphere Manifold Embedding for Person Re-Identification
+  - learn a hypersphere manifold embedding
+- https://arxiv.org/abs/1801.09414
+  - CosFace: Large Margin Cosine Loss for Deep Face Recognition
+- https://github.com/layumi/Person_reID_baseline_pytorch
+- https://github.com/KaiyangZhou/deep-person-reid
