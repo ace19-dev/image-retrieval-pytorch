@@ -5,8 +5,8 @@
 # Mail: tracyliang18@gmail.com
 # Adapted to python 3 by Aloisio Dourado in Sun Mar 11 2018
 
-# Note to Kagglers: This script will not run directly in Kaggle kernels. You
-# need to download it and run it on your local machine.
+# Note to Kagglers: This script will not runs directly in Kaggle kernels. You
+# need to download it and runs it on your local machine.
 
 # Images that already exist will not be downloaded again, so the script can
 # resume a partially completed download. All images will be saved in the JPG

@@ -1,5 +1,6 @@
 # Image-Retrieval-PyTorch
-- The leftmost is the query image. The remaining images are retrieved from gallery and ordered from left to right by similarity. The upper three row are correct retrieval and last row is incorrect retrieval.
+- The leftmost is the query image. The remaining images are retrieved from gallery and ordered from left to right by similarity. 
+The upper three row are correct retrieval and last row is incorrect retrieval.
 ![](assets/127_46.jpg)
 ![](assets/4371_8.jpg)
 ![](assets/2362_27.jpg)
@@ -12,8 +13,8 @@
 
 
 ## dataset
-- download_images.py (about 20GB) from https://www.kaggle.com/c/imaterialist-challenge-furniture-2018
-- https://www.kaggle.com/aloisiodn/python-3-download-multi-proc-prog-bar-resume
+- https://www.kaggle.com/c/imaterialist-challenge-furniture-2018
+- download_images.py (about 20GB) from https://www.kaggle.com/aloisiodn/python-3-download-multi-proc-prog-bar-resume Or use datasets/download_images.py
 
 ## References from 
 - https://arxiv.org/abs/1812.00442

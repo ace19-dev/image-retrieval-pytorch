@@ -14,7 +14,7 @@ class Options():
                             default=None,
                             # default='pre-trained/model_best.pth.tar',
                             help='load pretrianed mode')
-        parser.add_argument('--nclass', type=int, default=60, metavar='N',
+        parser.add_argument('--nclass', type=int, default=30, metavar='N',
             help='number of classes (default: 10)')
         # training hyper params
         parser.add_argument('--batch-size', type=int, default=256,
