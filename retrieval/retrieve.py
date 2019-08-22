@@ -97,12 +97,12 @@ def main():
 
     _, _, transform_infer = transforms.get_transform(args.dataset)
     galleryset = datasets.get_dataset(args.dataset,
-                                    root='/home/ace19/dl_data/materials/train',
-                                    transform=transform_infer)
+                                      root='/home/ace19/dl_data/materials/train',
+                                      transform=transform_infer)
     queryset = datasets.get_dataset(args.dataset,
-                                     split='eval',
-                                     root='/home/ace19/dl_data/materials/query',
-                                     transform=transform_infer)
+                                    split='eval',
+                                    root='/home/ace19/dl_data/materials/query',
+                                    transform=transform_infer)
     gallery_loader = DataLoader(
         galleryset, batch_size=args.batch_size, num_workers=args.workers)
     query_loader = torch.utils.data.DataLoader(
