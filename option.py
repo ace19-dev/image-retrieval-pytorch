@@ -6,7 +6,7 @@ class Options():
         # Training settings
         parser = argparse.ArgumentParser(description='Image Retrieval')
         parser.add_argument('--dataset', type=str, default='product',
-            help='training datasets (default: cifar10)')
+            help='training dataset (default: cifar10)')
         # model params
         parser.add_argument('--model', type=str, default='product_cosine_softmax',
             help='network model type (default: densenet)')

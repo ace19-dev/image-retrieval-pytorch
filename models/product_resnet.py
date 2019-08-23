@@ -13,7 +13,7 @@ class Product_ResNet(nn.Module):
     def __init__(self, nclass, pretrained, backbone):
         super(Product_ResNet, self).__init__()
         self.backbone = backbone
-        # copying modules from pretrained models
+        # copying modules from pretrained model
         if self.backbone == 'resnet50':
             self.pretrained = resnet.resnet50(pretrained, dilated=False)
         elif self.backbone == 'resnet101':
@@ -52,7 +52,7 @@ class Product_Cosine_Softmax(nn.Module):
         super(Product_Cosine_Softmax, self).__init__()
         self.nclass = nclass
         self.backbone = backbone
-        # copying modules from pretrained models
+        # copying modules from pretrained model
         if self.backbone == 'resnet50':
             self.pretrained = resnet.resnet50(pretrained, dilated=False)
         elif self.backbone == 'resnet101':
