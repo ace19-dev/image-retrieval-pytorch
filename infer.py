@@ -76,22 +76,22 @@ def main():
         submission = {}
 
         tbar = tqdm(infer_loader, desc='\r')
-        for batch_idx, (name, data) in enumerate(tbar):
+        for batch_idx, (fnames, images) in enumerate(tbar):
             if args.cuda:
-                data = data.cuda()
+                images = images.cuda()
 
             with torch.no_grad():
                 # TTA
-                batch_size, n_crops, c, h, w = data.size()
+                batch_size, n_crops, c, h, w = images.size()
                 # fuse batch size and ncrops
-                output = model(data.view(-1, c, h, w))
+                output = model(images.view(-1, c, h, w))
                 # avg over crops
                 output = output.view(batch_size, n_crops, -1).mean(1)
                 _, preds = torch.max(output, 1)
 
-            size = len(name)
+            size = len(fnames)
             for i in range(size):
-                submission[name[i]] = preds[i].cpu()
+                submission[fnames[i]] = preds[i].cpu()
         # end of for
 
         ########################

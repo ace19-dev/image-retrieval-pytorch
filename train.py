@@ -103,26 +103,26 @@ def main():
         global best_pred, acclist_train, acclist_val
 
         tbar = tqdm(train_loader, desc='\r')
-        for batch_idx, (_, data, target) in enumerate(tbar):
+        for batch_idx, (_, images, targets) in enumerate(tbar):
             scheduler(optimizer, batch_idx, epoch, best_pred)
-            # display_data(data)
+            # display_data(images)
             # TODO: Convert from list of 3D to 4D
-            # data = np.stack(data, axis=1)
-            # data = torch.from_numpy(data)
+            # images = np.stack(images, axis=1)
+            # images = torch.from_numpy(images)
 
             if args.cuda:
-                data, target = data.cuda(), target.cuda()
+                images, targets = images.cuda(), targets.cuda()
 
             # compute gradient and do SGD step
             optimizer.zero_grad()
-            _, output = model(data)
-            loss = criterion(output, target)
+            _, output = model(images)
+            loss = criterion(output, targets)
             loss.backward()
             optimizer.step()
 
-            acc1 = accuracy(output, target)
-            top1.update(acc1[0], data.size(0))
-            losses.update(loss.item(), data.size(0))
+            acc1 = accuracy(output, targets)
+            top1.update(acc1[0], images.size(0))
+            losses.update(loss.item(), images.size(0))
             tbar.set_description('\rLoss: %.3f | Top1: %.3f' % (losses.avg, top1.avg))
 
         acclist_train += [top1.avg]
@@ -142,31 +142,31 @@ def main():
         # bs, ncrops, c, h, w = input.size()
         # result = model(input.view(-1, c, h, w))  # fuse batch size and ncrops
         # result_avg = result.view(bs, ncrops, -1).mean(1)  # avg over crops
-        for batch_idx, (name, data, target) in enumerate(tbar):
+        for batch_idx, (fnames, images, targets) in enumerate(tbar):
             # Convert from list of 3D to 4D
-            # data = np.stack(data, axis=1)
-            # data = torch.from_numpy(data)
+            # images = np.stack(images, axis=1)
+            # images = torch.from_numpy(images)
 
             if args.cuda:
-                data, target = data.cuda(), target.cuda()
-                # data, target = Variable(data), Variable(target)
+                images, targets = images.cuda(), targets.cuda()
+                # images, targets = Variable(images), Variable(targets)
             with torch.no_grad():
-                # _, output = model(data)
+                # _, output = model(images)
 
                 # TTA
-                batch_size, n_crops, c, h, w = data.size()
+                batch_size, n_crops, c, h, w = images.size()
                 # fuse batch size and ncrops
-                _, output = model(data.view(-1, c, h, w))
+                _, output = model(images.view(-1, c, h, w))
                 # avg over crops
                 output = output.view(batch_size, n_crops, -1).mean(1)
                 # accuracy
-                acc1, acc5 = accuracy(output, target, topk=(1, 1))
-                top1.update(acc1[0], data.size(0))
-                top5.update(acc5[0], data.size(0))
+                acc1, acc5 = accuracy(output, targets, topk=(1, 1))
+                top1.update(acc1[0], images.size(0))
+                top5.update(acc5[0], images.size(0))
 
                 # confusion matrix
                 _, preds = torch.max(output, 1)
-                for t, p in zip(target.view(-1), preds.view(-1)):
+                for t, p in zip(targets.view(-1), preds.view(-1)):
                     confusion_matrix[t.long(), p.long()] += 1
 
             tbar.set_description('Top1: %.3f | Top5: %.3f' % (top1.avg, top5.avg))
@@ -224,15 +224,15 @@ def accuracy(output, target, topk=(1,)):
         return res
 
 
-def display_data(data):
+def display_data(image):
     # display image to verify
-    data = data.numpy()
-    data = np.transpose(data, (0, 2, 3, 1))
-    # # assets not np.any(np.isnan(data))
-    n_batch = data.shape[0]
+    image = image.numpy()
+    image = np.transpose(image, (0, 2, 3, 1))
+    # # assets not np.any(np.isnan(image))
+    n_batch = image.shape[0]
     # n_view = train_batch_xs.shape[1]
     for i in range(n_batch):
-        img = data[i]
+        img = image[i]
         # scipy.misc.toimage(img).show() Or
         img = cv2.cvtColor(img.astype(np.uint8), cv2.COLOR_BGR2RGB)
         cv2.imwrite('/home/ace19/Pictures/' + str(i) + '.png', img)
