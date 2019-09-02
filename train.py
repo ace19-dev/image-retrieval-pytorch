@@ -101,7 +101,6 @@ def main():
         top1 = AverageMeter()
 
         global best_pred, acclist_train, acclist_val
-        is_best = False
 
         tbar = tqdm(train_loader, desc='\r')
         for batch_idx, (_, data, target) in enumerate(tbar):
