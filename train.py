@@ -63,6 +63,7 @@ def main():
     else:
         model = model_zoo.get_model(args.model, backbone_pretrained=True)
     print(model)
+
     # criterion and optimizer
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(model.parameters(), lr=args.lr,
