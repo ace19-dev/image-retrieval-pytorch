@@ -59,9 +59,9 @@ def main():
 
     # init the backbone model
     if args.pretrained is not None:
-        model = model_zoo.get_model(args.model)
+        model = model_zoo.get_model(args.model, backbone=args.backbone)
     else:
-        model = model_zoo.get_model(args.model, backbone_pretrained=True)
+        model = model_zoo.get_model(args.model, backbone_pretrained=True, backbone=args.backbone)
     print(model)
 
     # criterion and optimizer

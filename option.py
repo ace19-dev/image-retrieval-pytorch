@@ -10,6 +10,8 @@ class Options():
         # model params
         parser.add_argument('--model', type=str, default='product_cosine_softmax',
             help='network model type (default: densenet)')
+        parser.add_argument('--backbone', type=str, default='efficientnet-b3',
+            help='backbone network model (default: resnet34)')
         parser.add_argument('--pretrained', type=str,
                             default=None,
                             # default='pre-trained/model_best.pth.tar',

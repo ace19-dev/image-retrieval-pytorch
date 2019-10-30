@@ -1,6 +1,6 @@
 # pylint: disable=wildcard-import, unused-wildcard-import
 
-from .product_resnet import *
+from .productnet import *
 
 
 __all__ = ['get_model']
