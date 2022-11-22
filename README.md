@@ -1,6 +1,6 @@
 # Image-Retrieval-PyTorch
 - The leftmost is the query image. The remaining images are retrieved from gallery and ordered from left to right by similarity. 
-The upper three row are correct retrieval and last row is incorrect retrieval.
+The upper three rows are correct retrieval and last row is incorrect retrieval.
 ![](assets/127_46.jpg)
 ![](assets/4371_8.jpg)
 ![](assets/2362_27.jpg)
